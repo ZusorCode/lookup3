@@ -171,7 +171,7 @@
 						placeholder='Battletags#1234 seperated by commas, spaces, tabs, new lines, semicolons...'></textarea>
 	<div class='grid grid-cols-1 sm:grid-cols-2 gap-2'>
 
-		<button class='p-2 bg-amber-500 rounded-lg text-white text-xl font-bold  hover:bg-amber-600 transition-colors'
+		<button class='p-2 bg-lime-600 rounded-lg text-white text-xl font-bold  hover:bg-lime-700 transition-colors'
 						class:animate-pulse={currentlyRunning !== 0} class:cursor-wait={currentlyRunning !== 0}
 						on:click={addPlayer}>
 			{#if currentlyRunning !== 0}
