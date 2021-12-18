@@ -1,4 +1,4 @@
-<a href="https://zusor.io" rel="noopener" target="_blank" class='absolute bottom-0 right-0 h-24 w-24 p-5'>
+<a href="https://zusor.io" rel="noopener" target="_blank" class='fixed bottom-0 right-0 h-24 w-24 p-5'>
     <svg clip-rule="evenodd" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"
          stroke-miterlimit="1.5" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg" class="fill-white">
         <g transform="matrix(4.88094 0 0 4.88094 -4679.27 -2629.27)">
