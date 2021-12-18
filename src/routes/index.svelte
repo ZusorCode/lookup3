@@ -109,7 +109,10 @@
 			key: 'games_played',
 			title: 'Games Played',
 			value: player => {
-				return player.success ? player.playerData?.competitiveStats?.games?.played || 0 : '';
+				return player.playerData?.competitiveStats?.games?.played || 0;
+			},
+			renderValue: player => {
+				return player.success ? player.playerData?.competitiveStats?.games?.played || '' : '';
 			},
 			sortable: true
 		},
@@ -117,7 +120,10 @@
 			key: 'tank',
 			title: 'Tank',
 			value: player => {
-				return player.success ? player.playerData?.ratings?.tank?.level || 0 : '';
+				return player.playerData?.ratings?.tank?.level || 0;
+			},
+			renderValue: player => {
+				return player.success ? player.playerData?.ratings?.tank?.level || '' : '';
 			},
 			sortable: true
 		},
@@ -125,7 +131,10 @@
 			key: 'damage',
 			title: 'Damage',
 			value: player => {
-				return player.success ? player.playerData?.ratings?.damage?.level || 0 : '';
+				return player.playerData?.ratings?.damage?.level || 0;
+			},
+			renderValue: player => {
+				return player.success ? player.playerData?.ratings?.damage?.level || '' : '';
 			},
 			sortable: true
 		},
@@ -133,7 +142,10 @@
 			key: 'support',
 			title: 'Support',
 			value: player => {
-				return player.success ? player.playerData?.ratings?.support?.level || 0 : '';
+				return player.playerData?.ratings?.support?.level || 0;
+			},
+			renderValue: player => {
+				return player.success ? player.playerData?.ratings?.support?.level || '' : '';
 			},
 			sortable: true
 		}
