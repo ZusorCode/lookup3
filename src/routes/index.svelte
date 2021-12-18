@@ -159,6 +159,9 @@
 	<meta content='summary' property='twitter:card'>
 	<meta content='@ZusorOW' property='twitter:site'>
 	<meta content='@ZusorOW' property='twitter:creator'>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
 </svelte:head>
 
 <div class='container mx-auto p-4 flex flex-col gap-4 text-white'>
@@ -188,8 +191,6 @@
 </div>
 
 <style>
-    @import url('https://rsms.me/inter/inter.css');
-
     :global(img.emoji) {
         height: 1em;
         width: 1em;
