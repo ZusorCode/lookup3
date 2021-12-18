@@ -35,8 +35,9 @@
 
 	$: currentBnets = players.map(player => [player.fixedBnet, player.bnet]).flat().filter(x => x);
 
-	async function addPlayer() {
-		let fixedBnetInput = bnetInput;
+
+	async function loadPlayers(bnets) {
+		let fixedBnetInput = bnets;
 		let newlineAlternatives = [',', ';', ':', ' ', '\t', '/', '"', '\'', '$', '-', '!', '\\\\'];
 		for (const alternative of newlineAlternatives) {
 			fixedBnetInput = fixedBnetInput.replace(new RegExp(alternative, 'g'), '\n');
@@ -56,6 +57,14 @@
 			}
 			queuedBnets.push(battletag);
 		}
+
+	}
+	async function addPlayersFromTextArea() {
+		await loadPlayers(bnetInput);
+	}
+
+	async function addPlayersFromPaste(data) {
+		await loadPlayers(data);
 	}
 
 	function clearPlayers() {
@@ -179,13 +188,14 @@
 <div class='container mx-auto p-4 flex flex-col gap-4 text-white'>
 	<h1 class='text-6xl font-bold'>Overwatch Bulk Lookup</h1>
 	<textarea bind:value={bnetInput} class='rounded-lg bg-gray-800 text h-36'
-						on:keyup={e=>e.key==='Enter' && addPlayer()}
+						on:keyup={e=>e.key==='Enter' && addPlayersFromTextArea()}
+						on:paste={val => addPlayersFromPaste(val.clipboardData.getData('text'))}
 						placeholder='Battletags#1234 seperated by commas, spaces, tabs, new lines, semicolons...'></textarea>
 	<div class='grid grid-cols-1 sm:grid-cols-2 gap-2'>
 
 		<button class='p-2 bg-lime-600 rounded-lg text-white text-xl font-bold  hover:bg-lime-700 transition-colors'
 						class:animate-pulse={currentlyRunning !== 0} class:cursor-wait={currentlyRunning !== 0}
-						on:click={addPlayer}>
+						on:click={addPlayersFromTextArea}>
 			{#if currentlyRunning !== 0}
 				Loading {currentlyRunning} players...
 			{:else }
@@ -225,7 +235,6 @@
 
     :global(::-webkit-scrollbar-thumb) {
         @apply bg-gray-600 rounded-lg;
-
     }
 
     :global(::-webkit-resizer) {
