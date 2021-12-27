@@ -14,24 +14,7 @@
 	let currentlyRunning = 0;
 	let bnetInput = '';
 	let players = [];
-	let queuedBnets = [];
-
-	setInterval(async () => {
-		const lookups = queuedBnets.map(async bnet => {
-			try {
-				const player = (await axios.post('/load-player', { bnet: bnet })).data;
-				players.push(player);
-				players = players;
-			} catch (e) {
-				console.log(e);
-			}
-			currentlyRunning -= 1;
-		});
-		queuedBnets = [];
-		currentlyRunning += lookups.length;
-		await Promise.all(lookups);
-
-	}, 100);
+	let lockedBnets = [];
 
 	$: currentBnets = players.map(player => [player.fixedBnet, player.bnet]).flat().filter(x => x);
 
@@ -43,22 +26,38 @@
 			fixedBnetInput = fixedBnetInput.replace(new RegExp(alternative, 'g'), '\n');
 		}
 		let userInputs = fixedBnetInput.split(/\r?\n/).filter(x => x);
-		let battletags = [];
 
-		for (const userInput of userInputs) {
-			if (userInput.match(battletagCheck) !== null) {
-				battletags.push(userInput);
+		let queuedBnets = userInputs
+			// Remove empty values
+			.filter(bnet => !!bnet)
+			// Only check for valid battletags
+			.filter(userInput => userInput.match(battletagCheck) !== null)
+			// Make sure the battletag is not already in the list
+			.filter(bnet => !currentBnets.includes(bnet))
+			// Make sure the battletag is not already being loaded
+			.filter(bnet => !lockedBnets.includes(bnet));
+
+		// Remove duplicates
+		queuedBnets = [...new Set(queuedBnets)];
+
+		// lock the battletags from processing them again
+		lockedBnets = lockedBnets.concat(queuedBnets);
+
+		const lookups = queuedBnets.map(async bnet => {
+			try {
+				const player = (await axios.post('/load-player', { bnet: bnet })).data;
+				players.push(player);
+				lockedBnets = lockedBnets.filter(x => x !== bnet);
+				players = players;
+			} catch (e) {
+				console.log(e);
 			}
-		}
-
-		for (const battletag of battletags) {
-			if (currentBnets.includes(battletag) || !battletag) {
-				return;
-			}
-			queuedBnets.push(battletag);
-		}
-
+			currentlyRunning -= 1;
+		});
+		currentlyRunning += lookups.length;
+		await Promise.all(lookups);
 	}
+
 	async function addPlayersFromTextArea() {
 		await loadPlayers(bnetInput);
 	}
@@ -79,14 +78,15 @@
 			renderValue: player => {
 				if (player.success) {
 					if (player.wasFixed) {
-						return `<span class='inline-flex gap-2'><span class='line-through'>${player.bnet}</span></span></span> ${player.fixedBnet}`;
+						return `<span class='inline-flex gap-2 items-center'><span class='line-through'>${player.bnet}</span></span></span> ${player.fixedBnet}`;
 					} else {
 						return player.bnet;
 					}
 				} else {
-					return `<span class='inline-flex gap-2'>${twemoji.parse('❌')} <span class='line-through'>${player.bnet}</span></span`;
+					return `<span class='inline-flex gap-2 items-center'>${twemoji.parse('❌')} <span class='line-through'>${player.bnet}</span></span`;
 				}
 			},
+			headerClass: 'text-left',
 			sortable: true
 		},
 		{
@@ -94,6 +94,7 @@
 			title: 'Level',
 			value: player => player.playerData?.prestige * 100 + player.playerData?.level || 0,
 			renderValue: player => player.playerData?.prestige * 100 + player.playerData?.level || '',
+			headerClass: 'text-left',
 			sortable: true
 		},
 		{
@@ -101,6 +102,7 @@
 			title: 'Private',
 			value: player => player.playerData?.private || true,
 			renderValue: player => player.success ? player.playerData?.private ? twemoji.parse('🔒') : twemoji.parse('🔓') : '',
+			class: 'flex justify-center',
 			sortable: true
 		},
 		{
@@ -112,6 +114,7 @@
 			renderValue: player => {
 				return player.success ? `${Math.round((player.playerData?.competitiveStats?.games?.won / player.playerData?.competitiveStats?.games?.played) * 100) || 0}%` : '';
 			},
+			class: 'text-center tabular-nums',
 			sortable: true
 		},
 		{
@@ -123,6 +126,7 @@
 			renderValue: player => {
 				return player.success ? player.playerData?.competitiveStats?.games?.played || '' : '';
 			},
+			class: 'text-center tabular-nums',
 			sortable: true
 		},
 		{
@@ -134,6 +138,7 @@
 			renderValue: player => {
 				return player.success ? player.playerData?.ratings?.tank?.level || '' : '';
 			},
+			class: 'text-center tabular-nums',
 			sortable: true
 		},
 		{
@@ -145,6 +150,7 @@
 			renderValue: player => {
 				return player.success ? player.playerData?.ratings?.damage?.level || '' : '';
 			},
+			class: 'text-center tabular-nums',
 			sortable: true
 		},
 		{
@@ -156,6 +162,7 @@
 			renderValue: player => {
 				return player.success ? player.playerData?.ratings?.support?.level || '' : '';
 			},
+			class: 'text-center tabular-nums',
 			sortable: true
 		}
 	];
@@ -180,9 +187,9 @@
 	<meta content='summary' property='twitter:card'>
 	<meta content='@ZusorOW' property='twitter:site'>
 	<meta content='@ZusorOW' property='twitter:creator'>
-	<link rel="preconnect" href="https://fonts.googleapis.com">
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+	<link href='https://fonts.googleapis.com' rel='preconnect'>
+	<link crossorigin href='https://fonts.gstatic.com' rel='preconnect'>
+	<link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap' rel='stylesheet'>
 </svelte:head>
 
 <div class='container mx-auto p-4 flex flex-col gap-4 text-white'>
@@ -202,7 +209,8 @@
 				Load
 			{/if}
 		</button>
-		<button class='p-2 bg-red-500 rounded-lg text-white text-xl font-bold hover:bg-red-600 transition-colors' on:click={clearPlayers}>
+		<button class='p-2 bg-red-500 rounded-lg text-white text-xl font-bold hover:bg-red-600 transition-colors'
+						on:click={clearPlayers}>
 			Clear
 		</button>
 	</div>
